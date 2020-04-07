@@ -2,7 +2,9 @@
 
 ## To-do List
 
-* [ ] Read the spec and make this list
+* Errors
+    * [ ] Header ECC
+    * [ ] Footer Checksum
 
 ## Reference Documents
 

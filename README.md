@@ -1,7 +1,11 @@
 # MIPI CSI 2 Receiver
 
 ## To-do List
-
+* Image format decoding
+    * [ ] RGB
+    * [ ] YUV
+    * [ ] RAW
+* Tests
 * Errors
     * [ ] Header ECC
     * [ ] Footer Checksum

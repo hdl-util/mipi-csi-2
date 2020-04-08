@@ -1,11 +1,16 @@
 # MIPI CSI 2 Receiver
 
+[![Build Status](https://travis-ci.com/hdl-util/mipi-csi-2.svg?branch=master)](https://travis-ci.com/hdl-util/mipi-csi-2)
+
 ## To-do List
 * Image format decoding
     * [ ] RGB
     * [ ] YUV
     * [ ] RAW
 * Tests
+    * [x] D-PHY
+    * [ ] CSI-2
+    * [ ] Bayer (?)
 * Errors
     * [ ] Header ECC
     * [ ] Footer Checksum

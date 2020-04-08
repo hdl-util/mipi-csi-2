@@ -1,8 +1,6 @@
 files = [
-    "clock_tb.sv",
-    "master_tb.sv",
-    "fast_master_tb.sv",
-    "slow_master_tb.sv"
+    "camera_tb.sv",
+    "d_phy_receiver_tb.sv"
 ]
 
 modules = {

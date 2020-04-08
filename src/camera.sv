@@ -29,14 +29,14 @@ generate
             .clock_n(clock_n),
             .data_p(data_p[i]),
             .data_n(data_n[i]),
-            .reset(reset),
+            .reset(reset[i]),
             .data(data[i]),
             .enable(enable[i])
         );
     end
 endgenerate
 
-logic [7:0] packet_header [3:0] = 32'd0;
+logic [7:0] packet_header [3:0] = '{8'd0, 8'd0, 8'd0, 8'd0};
 assign virtual_channel = packet_header[0][7:6];
 logic [7:0] data_type;
 assign data_type = packet_header[0][5:0];
@@ -96,7 +96,7 @@ begin
     // Synchronous state reset (next clock)
     if (reset[0]) // Know the entire state is gone for sure if the first lane resets
     begin
-        packet_header = 32'd0;
+        packet_header = '{8'd0, 8'd0, 8'd0, 8'd0};
         image_data = 32'd0;
         header_index = 3'd0;
         word_counter = 17'd0;

@@ -11,12 +11,18 @@ module camera #(
     output logic [15:0] word_count,
     // See Section 12 for how this should be parsed
     output logic [7:0] image_data [3:0] = '{8'd0, 8'd0, 8'd0, 8'd0},
-    output logic [7:0] image_data_type,
+    output logic [5:0] image_data_type,
     // Whether there is output data ready
     output logic image_data_enable,
 
-    output logic frame_start = 1'b0,
-    output logic line_start = 1'b0,
+    output logic frame_start,
+    output logic frame_end,
+    output logic line_start,
+    output logic line_end,
+    // The  intention  of  the  Generic  Short  Packet  Data  Types  is  to  provide  a  mechanism  for  including  timing 
+    // information for the opening/closing of shutters, triggering of flashes, etc within the data stream.
+    output logic generic_short_data_enable,
+    output logic [15:0] generic_short_data
 );
 
 logic [NUM_LANES-1:0] reset = NUM_LANES'(0);
@@ -41,9 +47,17 @@ endgenerate
 
 logic [7:0] packet_header [3:0] = '{8'd0, 8'd0, 8'd0, 8'd0};
 assign virtual_channel = packet_header[0][7:6];
-logic [7:0] data_type;
+logic [5:0] data_type;
 assign data_type = packet_header[0][5:0];
 assign image_data_type = data_type;
+
+assign frame_start = data_type == 6'd0;
+assign frame_end = data_type == 6'd1;
+assign line_start = data_type == 6'd2;
+assign line_end = data_type == 6'd3;
+assign generic_short_data_enable = data_type >= 6'd8 && data_type <= 6'hF;
+assign generic_short_data = word_count;
+
 assign word_count = {packet_header[2], packet_header[1]}; // Recall: LSB first
 logic [7:0] header_ecc;
 assign header_ecc = packet_header[3];
@@ -54,7 +68,7 @@ logic [1:0] data_index = 2'd0;
 
 // Count off multiples of four
 // Shouldn't be the first byte
-assign image_data_enable = data_type >= 8'h18 && data_type <= 8'h2F && word_counter != 17'd0 && data_index == 2'd0;
+assign image_data_enable = data_type >= 6'h18 && data_type <= 6'h2F && word_counter != 17'd0 && data_index == 2'd0;
 
 integer j;
 always @(posedge clock_p or posedge clock_n)
@@ -72,7 +86,7 @@ begin
             else // Long packet receive
             begin
                 // Image data (YUV, RGB, RAW)
-                if (data_type >= 8'h18 && data_type <= 8'h2F && word_counter < word_count)
+                if (data_type >= 6'h18 && data_type <= 6'h2F && word_counter < word_count)
                 begin
                     image_data[data_index] = data[j];
                     data_index = data_index + 2'd1; // Wrap-around 4 byte counter
@@ -89,7 +103,7 @@ begin
     // Lane resetting
     for (j = 0; j < NUM_LANES; j++)
     begin
-        if (data_type <= 8'h0F && header_index + 3'(j) >= 3'd4 && !reset[j]) // Reset on short packet end
+        if (data_type <= 6'h0F && header_index + 3'(j) >= 3'd4 && !reset[j]) // Reset on short packet end
         begin
             `ifdef MODEL_TECH
                 $display("Resetting lane %d", 3'(j + 1));

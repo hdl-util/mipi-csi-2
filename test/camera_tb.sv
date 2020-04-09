@@ -17,7 +17,7 @@ assign data_n = ~data_p;
 logic [1:0] virtual_channel;
 logic [15:0] word_count;
 logic [7:0] image_data [3:0];
-logic [7:0] image_data_type;
+logic [5:0] image_data_type;
 logic image_data_enable;
 
 camera #(.NUM_LANES(2)) camera (

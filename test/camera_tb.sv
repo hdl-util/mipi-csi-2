@@ -45,13 +45,14 @@ begin
     shift_index <= shift_index + 1'd1;
 end
 
-// Virtual Channel: 0, Data Type: 0x08 (Generic Short Packet), Word Count: 0xFACE, ECC: 0x1234
-logic [7:0] TEST1 [3:0] = '{8'h08, 8'hFA, 8'hCE, 8'h12};
+// Short Packet (Virtual Channel: 0, Data Type: 0x08 (Generic Short Packet), Word Count: 0xFACE, ECC: 0x12)
+logic [7:0] TEST1 [0:3] = '{8'h08, 8'hCE, 8'hFA, 8'h12};
+// Long Packet (Virtual Channel: 0, Data Type: 0x18 (YUV Data), Word Count: 8, ECC: 0xFE, Data: 0x0D15EA5EFEE1DEAD CRC: 0xF00D)
+logic [7:0] TEST2 [0:13] = '{8'h18, 8'd8, 8'd0, 8'hFE, 8'hAD, 8'hDE, 8'hE1, 8'hFE, 8'h5E, 8'hEA, 8'h15, 8'h0D, 8'hD0, 8'hF0};
 
 integer i;
 initial
 begin
-    // #10ns;
     // Shift out sync
     wait (shift_index != 8'd0); wait (shift_index == 8'd0);
     shift_out[0] <= 8'b00011101;
@@ -63,18 +64,37 @@ begin
         wait (shift_index != 8'd0); wait (shift_index == 8'd0);
         shift_out[0] <= TEST1[i];
         shift_out[1] <= TEST1[i+1];
-        if (i != 0)
-        begin
-            // wait (enable);
-            // assert (data === TEST1[i - 1]) else $fatal(1, "Received data incorrect for %d: expected %h, got %h", 4'(i), TEST1[i-1], data);
-        end
     end
 
     wait (camera.reset[0] == 1'd1);
     assert (word_count == {TEST1[2], TEST1[1]}) else $fatal(1, "Expected word count '%h%h' but was %h", TEST1[2], TEST1[1], word_count);
-    assert (image_data_type == TEST1[3]) else $fatal(1, "Expected data type %h but was %h", TEST1[3], image_data_type);
+    assert (image_data_type == TEST1[0]) else $fatal(1, "Expected data type %h but was %h", TEST1[0], image_data_type);
+
+    wait (camera.reset[0] == 1'd0);
+
+
+    // Shift out sync
     wait (shift_index != 8'd0); wait (shift_index == 8'd0);
-    wait (shift_index != 8'd0); wait (shift_index == 8'd0);
+    shift_out[0] <= 8'b00011101;
+    shift_out[1] <= 8'b00011101;
+
+    // Shift out bytes
+    for (i = 0; i < 14; i+= 2)
+    begin
+        wait (shift_index != 8'd0); wait (shift_index == 8'd0);
+        shift_out[0] <= TEST2[i];
+        shift_out[1] <= TEST2[i+1];
+        if (i % 4 == 3 && i > 3)
+        begin
+            assert (image_data_enable);
+        end
+        else
+            assert (!image_data_enable);
+    end
+
+    wait (camera.reset[0] == 1'd1);
+    assert (word_count == {TEST2[2], TEST2[1]}) else $fatal(1, "Expected word count '%h%h' but was %h", TEST2[2], TEST2[1], word_count);
+    assert (image_data_type == TEST2[0]) else $fatal(1, "Expected data type %h but was %h", TEST2[0], image_data_type);
     $finish;
 end
 

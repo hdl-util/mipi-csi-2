@@ -19,6 +19,11 @@
     * [x] 2 lane
     * [ ] 3 lane
         * Roadblock: will receive more bytes than the 32-bit buffer
+            * Consider long packet with 8 bytes
+            * First 3 from header go from corresponding lanes
+            * Header byte 4 comes from lane 1, Data byte 1, 2 come from lanes 2 & 3
+            * Data byte 3, 4, 5 (!) come from lanes 1, 2, & 3
+            * Thus, you are stuck with extra, on the same clock the user gets the buffer
     * [x] 4 lane
 
 ## Reference Documents

@@ -13,7 +13,10 @@ module camera #(
     output logic [7:0] image_data [3:0] = '{8'd0, 8'd0, 8'd0, 8'd0},
     output logic [7:0] image_data_type,
     // Whether there is output data ready
-    output logic image_data_enable
+    output logic image_data_enable,
+
+    output logic frame_start = 1'b0,
+    output logic line_start = 1'b0,
 );
 
 logic [NUM_LANES-1:0] reset = NUM_LANES'(0);

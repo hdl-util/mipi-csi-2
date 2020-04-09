@@ -45,7 +45,6 @@ integer i;
 
 initial
 begin
-    // #10ns;
     // Shift out sync
     wait (shift_index != 8'd0); wait (shift_index == 8'd0);
     shift_out <= 8'b00011101;

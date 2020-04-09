@@ -39,11 +39,11 @@ endgenerate
 logic [7:0] packet_header [3:0] = '{8'd0, 8'd0, 8'd0, 8'd0};
 assign virtual_channel = packet_header[0][7:6];
 logic [7:0] data_type;
-assign data_type = packet_header[0][5:0];
+assign data_type = packet_header[3][5:0];
 assign image_data_type = data_type;
 assign word_count = {packet_header[2], packet_header[1]}; // Recall: LSB first
 logic [7:0] header_ecc;
-assign header_ecc = packet_header[3];
+assign header_ecc = packet_header[0];
 
 logic [2:0] header_index = 3'd0;
 logic [16:0] word_counter = 17'd0;
@@ -59,7 +59,7 @@ begin
     // Lane reception
     for (j = 0; j < NUM_LANES; j++)
     begin
-        if (enable[j]) // Receive byte
+        if (!reset[j] && enable[j]) // Receive byte
         begin
             if (header_index < 3'd4) // Packet header
             begin
@@ -87,7 +87,10 @@ begin
     for (j = 0; j < NUM_LANES; j++)
     begin
         if (data_type <= 8'h0F && header_index + 3'(j) >= 3'd4 && !reset[j]) // Reset on short packet end
+        begin
+            $display("Resetting lane %d", 3'(j + 1));
             reset[j] <= 1'b1;
+        end
         else if (header_index + word_counter + 17'(j) >= 17'(word_count) + 17'd2 + 3'd4 && !reset[j]) // Reset on long packet end
             reset[j] <= 1'b1;
         else // No reset otherwise

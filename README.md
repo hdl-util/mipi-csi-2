@@ -14,6 +14,12 @@
 * Errors
     * [ ] Header ECC
     * [ ] Footer Checksum
+* N-lane
+    * [x] 1 lane
+    * [x] 2 lane
+    * [ ] 3 lane
+        * Roadblock: will receive more bytes than the 32-bit buffer
+    * [x] 4 lane
 
 ## Reference Documents
 

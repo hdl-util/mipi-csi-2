@@ -16,7 +16,7 @@ assign data_n = ~data_p;
 
 logic [1:0] virtual_channel;
 logic [15:0] word_count;
-logic [31:0] image_data;
+logic [7:0] image_data [3:0];
 logic [7:0] image_data_type;
 logic image_data_enable;
 
@@ -84,12 +84,15 @@ begin
         wait (shift_index != 8'd0); wait (shift_index == 8'd0);
         shift_out[0] <= TEST2[i];
         shift_out[1] <= TEST2[i+1];
-        if (i % 4 == 3 && i > 3)
+        if (i % 4 == 2 && i > 6) // Skip header, straight to data checking
         begin
-            assert (image_data_enable);
+            assert (image_data_enable) else $fatal(1, "Image data not enabled on receiving the fourth byte");
+            assert (image_data == '{TEST2[i-3], TEST2[i-4], TEST2[i-5], TEST2[i-6]}) else $fatal(1, "Expected buffer to be %h but was %h", {TEST2[i-3], TEST2[i-4], TEST2[i-5], TEST2[i-6]}, {image_data[3], image_data[2], image_data[1], image_data[0]});
         end
         else
+        begin
             assert (!image_data_enable);
+        end
     end
 
     wait (camera.reset[0] == 1'd1);

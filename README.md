@@ -6,8 +6,8 @@
 * Primary format decoding
     * [x] RGB888
     * [x] RGB565
-    * [ ] YUV422 8-bit
-    * [ ] RAW8
+    * [x] YUV422 8-bit
+    * [x] RAW8
     * [ ] RAW10
 * Tests
     * [x] D-PHY

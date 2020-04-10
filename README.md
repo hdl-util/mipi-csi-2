@@ -37,5 +37,4 @@ These documents are not hosted here! They are available on Library Genesis and a
 
 ## Special Thanks
 
-* [Gaurav Singh's posts on his CSI-2 RX implementation](https://www.circuitvalley.com/2020/02/imx219-camera-mipi-csi-receiver-fpga-lattice-raspberry-pi-camera.html)
-
+* [Gaurav Singh's posts on his IMX219 CSI-2 RX implementation](https://www.circuitvalley.com/2020/02/imx219-camera-mipi-csi-receiver-fpga-lattice-raspberry-pi-camera.html)

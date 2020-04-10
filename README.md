@@ -3,15 +3,17 @@
 [![Build Status](https://travis-ci.com/hdl-util/mipi-csi-2.svg?branch=master)](https://travis-ci.com/hdl-util/mipi-csi-2)
 
 ## To-do List
-* Image format decoding
-    * [ ] RGB
-    * [ ] YUV
-    * [ ] RAW
+* Primary format decoding
+    * [x] RGB888
+    * [x] RGB565
+    * [ ] YUV422 8-bit
+    * [ ] RAW8
+    * [ ] RAW10
 * Tests
     * [x] D-PHY
-    * [ ] CSI-2
-    * [ ] Bayer (?)
-* Errors
+    * [x] CSI-2
+    * [ ] Decoding
+* Error-checking and correction
     * [ ] Header ECC
     * [ ] Footer Checksum
 * N-lane

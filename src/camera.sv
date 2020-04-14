@@ -71,7 +71,7 @@ logic [1:0] data_index = 2'd0;
 assign image_data_enable = data_type >= 6'h18 && data_type <= 6'h2F && word_counter != 17'd0 && (data_index == 2'd0 || word_counter == word_count);
 
 integer j;
-always @(posedge clock_p or posedge clock_n)
+always @(posedge clock_p)
 begin
     // Lane reception
     for (j = 0; j < NUM_LANES; j++)
@@ -127,7 +127,7 @@ begin
         image_data = '{8'd0, 8'd0, 8'd0, 8'd0};
         header_index = 3'd0;
         word_counter = 17'd0;
-        data_index = 4'd0;
+        data_index = 2'd0;
     end
 end
 

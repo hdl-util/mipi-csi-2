@@ -6,9 +6,7 @@
 // https://www.intel.com/content/www/us/en/programmable/documentation/mcn1446711751001.html#mcn1448380606073
 module d_phy_receiver (
     input logic clock_p,
-    input logic clock_n,
     input logic data_p,
-    input logic data_n,
     // Synchronous reset
     // D-PHY clocks for TCLK-POST after the HS RX ends so this will stick
     input logic reset,
@@ -19,7 +17,7 @@ module d_phy_receiver (
 );
 
 logic data_p_l;
-always_ff @(posedge clock_n) data_p_l <= data_p;
+always @(negedge clock_p) data_p_l <= data_p;
 
 // 0 = LP RX or some other non-receiving unknown
 // 1 = In phase sync

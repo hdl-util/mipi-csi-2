@@ -22,9 +22,7 @@ logic image_data_enable;
 
 camera #(.NUM_LANES(2)) camera (
     .clock_p(clock_p),
-    .clock_n(clock_n),
     .data_p(data_p),
-    .data_n(data_n),
     // Corresponding virtual channel for the image data
     .virtual_channel(virtual_channel),
     // Total number of words in the current packet

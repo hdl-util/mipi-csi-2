@@ -20,9 +20,7 @@ logic enable;
 
 d_phy_receiver d_phy_receiver (
     .clock_p(clock_p),
-    .clock_n(clock_n),
     .data_p(data_p),
-    .data_n(data_n),
     // Synchronous reset
     // D-PHY clocks for TCLK-POST after the HS RX ends so this will stick
     .reset(reset),
@@ -66,9 +64,10 @@ begin
     assert (data == TEST1[7]) else $fatal(1, "Received data incorrect for %d: expected %h, got %h", 4'(7), TEST1[7], data);
     
 
+    wait (!clock_p);
     reset <= 1'd1; // Reset should be applied without any spurious enables, even if it is delayed by a few clocks
-    wait (shift_index != 8'd0);
-    wait (shift_index != 8'd1);
+    wait (clock_p);
+    wait (!clock_p);
     assert (d_phy_receiver.state == 1'b0);
     $finish;
 end

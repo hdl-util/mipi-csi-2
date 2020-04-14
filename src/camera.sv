@@ -2,9 +2,7 @@ module camera #(
     parameter NUM_LANES = 2
 ) (
     input logic clock_p,
-    input logic clock_n,
     input logic [NUM_LANES-1:0] data_p,
-    input logic [NUM_LANES-1:0] data_n,
     // Corresponding virtual channel for the image data
     output logic [1:0] virtual_channel,
     // Total number of words in the current packet
@@ -35,9 +33,7 @@ generate
     begin: lane_receivers
         d_phy_receiver d_phy_receiver (
             .clock_p(clock_p),
-            .clock_n(clock_n),
             .data_p(data_p[i]),
-            .data_n(data_n[i]),
             .reset(reset[i]),
             .data(data[i]),
             .enable(enable[i])

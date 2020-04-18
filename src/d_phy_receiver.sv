@@ -16,58 +16,60 @@ module d_phy_receiver (
     output logic enable
 );
 
-logic data_p_l;
-always @(negedge clock_p) data_p_l <= data_p;
+logic dataout_h = 1'd0;
+logic dataout_l = 1'd0;
+
+always @(posedge clock_p) dataout_h <= data_p;
+always @(negedge clock_p) dataout_l <= data_p;
 
 // 0 = LP RX or some other non-receiving unknown
 // 1 = In phase sync
 // 2 = Out of phase sync
 logic [1:0] state = 2'd0;
 
-logic [8:0] internal_data = 9'dX;
+logic [8:0] internal_data = 9'd0;
 assign data = state == 2'd2 ? internal_data[7:0] : internal_data[8:1];
 
 // Byte counter
-logic [2:0] counter = 4'd0;
+logic [1:0] counter = 2'd0;
 
-assign enable = state != 2'd0 && counter == 3'd0;
+assign enable = state != 2'd0 && counter == 2'd0;
 
 always @(posedge clock_p)
 begin
     if (reset)
     begin
-        internal_data = 8'd0;
+        internal_data <= 8'd0;
         state <= 2'd0;
-        counter <= 4'd0;
+        counter <= 2'd0;
     end
-    else // if (clock_p ^ clock_n) // LP stop could show up as a double posedge
+    else
     begin
-        internal_data = {data_p, data_p_l, internal_data[8:2]}; // "Each byte shall be transmitted least significant bit first."
+        internal_data <= {dataout_l, dataout_h, internal_data[8:2]}; // "Each byte shall be transmitted least significant bit first."
         if (state == 2'd0)
         begin
-            if (internal_data == 9'b000111010) // In phase sync sync
+            if (internal_data[8:1] == 8'b00011101) // In phase sync sync
             begin
-                // $display("ACK");
                 state <= 2'd1;
-                counter <= 3'd4;
+                counter <= 2'd3;
             end
-            else if (internal_data == 9'b000011101) // Out of phase sync
+            else if (internal_data[7:0] == 8'b00011101) // Out of phase sync
             begin
                 state <= 2'd2;
-                counter <= 3'd4;
+                counter <= 2'd3;
             end
             else
             begin
                 state <= 2'd0;
-                counter <= 3'd0;
+                counter <= 2'd3;
             end
         end
         else
         begin
             state <= state;
-            counter <= counter == 3'd0 ? 3'd3 : counter - 3'd1;
+            counter <= counter - 2'd1;
             `ifdef MODEL_TECH
-                if (counter == 4'd0)
+                if (counter == 2'd0)
                     $display("%h", data);
             `endif
         end

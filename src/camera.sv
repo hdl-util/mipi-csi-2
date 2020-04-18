@@ -72,11 +72,11 @@ begin
     // Lane reception
     for (j = 0; j < NUM_LANES; j++)
     begin
-        if (!reset[j] && enable[j]) // Receive byte
+        if (enable[j]) // Receive byte
         begin
             if (header_index < 3'd4) // Packet header
             begin
-                packet_header[header_index] = data[j];
+                packet_header[header_index] <= data[j];
                 header_index = header_index + 1'd1;
             end
             else // Long packet receive
@@ -84,7 +84,7 @@ begin
                 // Image data (YUV, RGB, RAW)
                 if (data_type >= 6'h18 && data_type <= 6'h2F && word_counter < word_count)
                 begin
-                    image_data[data_index] = data[j];
+                    image_data[data_index] <= data[j];
                     data_index = data_index + 2'd1; // Wrap-around 4 byte counter
                 end
                 // Footer
@@ -119,8 +119,8 @@ begin
     // Synchronous state reset (next clock)
     if (reset[0]) // Know the entire state is gone for sure if the first lane resets
     begin
-        packet_header = '{8'd0, 8'd0, 8'd0, 8'd0};
-        image_data = '{8'd0, 8'd0, 8'd0, 8'd0};
+        packet_header <= '{8'd0, 8'd0, 8'd0, 8'd0};
+        image_data <= '{8'd0, 8'd0, 8'd0, 8'd0};
         header_index = 3'd0;
         word_counter = 17'd0;
         data_index = 2'd0;

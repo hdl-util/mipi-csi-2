@@ -7,8 +7,11 @@ module camera #(
     output logic [1:0] virtual_channel,
     // Total number of words in the current packet
     output logic [15:0] word_count,
+
+    output logic interrupt,
+
     // See Section 12 for how this should be parsed
-    output logic [7:0] image_data [3:0] = '{8'd0, 8'd0, 8'd0, 8'd0},
+    output logic [7:0] image_data [0:3] = '{8'd0, 8'd0, 8'd0, 8'd0},
     output logic [5:0] image_data_type,
     // Whether there is output data ready
     output logic image_data_enable,
@@ -17,11 +20,14 @@ module camera #(
     output logic frame_end,
     output logic line_start,
     output logic line_end,
+
     // The  intention  of  the  Generic  Short  Packet  Data  Types  is  to  provide  a  mechanism  for  including  timing 
     // information for the opening/closing of shutters, triggering of flashes, etc within the data stream.
     output logic generic_short_data_enable,
     output logic [15:0] generic_short_data
 );
+
+assign interrupt = image_data_enable || reset[0];
 
 logic [NUM_LANES-1:0] reset = NUM_LANES'(0);
 logic [7:0] data [NUM_LANES-1:0];
@@ -51,7 +57,7 @@ assign frame_start = data_type == 6'd0;
 assign frame_end = data_type == 6'd1;
 assign line_start = data_type == 6'd2;
 assign line_end = data_type == 6'd3;
-assign generic_short_data_enable = data_type >= 6'd8 && data_type <= 6'hF;
+assign generic_short_data_enable = data_type >= 6'd8 && data_type <= 6'hF && reset[0];
 assign generic_short_data = word_count;
 
 assign word_count = {packet_header[2], packet_header[1]}; // Recall: LSB first
@@ -99,22 +105,23 @@ begin
     // Lane resetting
     for (j = 0; j < NUM_LANES; j++)
     begin
-        if (data_type <= 6'h0F && header_index + 3'(j) >= 3'd4 && !reset[j]) // Reset on short packet end
+        if (enable != NUM_LANES'(0))
         begin
-            `ifdef MODEL_TECH
-                $display("Resetting lane %d", 3'(j + 1));
-            `endif
-            reset[j] <= 1'b1;
+            if (data_type <= 6'h0F && header_index + 3'(j) >= 3'd4 && !reset[j]) // Reset on short packet end
+            begin
+                `ifdef MODEL_TECH
+                    $display("Resetting lane %d", 3'(j + 1));
+                `endif
+                reset[j] <= 1'b1;
+            end
+            else if (header_index + 3'(j) >= 3'd4 && header_index + word_counter + 17'(j) >= 17'(word_count) + 17'd2 + 3'd4 && !reset[j]) // Reset on long packet end
+            begin
+                `ifdef MODEL_TECH
+                    $display("Resetting lane %d", 3'(j + 1));
+                `endif
+                reset[j] <= 1'b1;
+            end
         end
-        else if (header_index + word_counter + 17'(j) >= 17'(word_count) + 17'd2 + 3'd4 && !reset[j]) // Reset on long packet end
-        begin
-            `ifdef MODEL_TECH
-                $display("Resetting lane %d", 3'(j + 1));
-            `endif
-            reset[j] <= 1'b1;
-        end
-        else // No reset otherwise
-            reset[j] <= 1'b0;
     end
     // Synchronous state reset (next clock)
     if (reset[0]) // Know the entire state is gone for sure if the first lane resets
@@ -124,6 +131,7 @@ begin
         header_index = 3'd0;
         word_counter = 17'd0;
         data_index = 2'd0;
+        reset <= NUM_LANES'(0);
     end
 end
 

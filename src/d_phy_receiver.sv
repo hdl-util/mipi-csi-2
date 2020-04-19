@@ -48,12 +48,12 @@ begin
         internal_data <= {dataout_l, dataout_h, internal_data[8:2]}; // "Each byte shall be transmitted least significant bit first."
         if (state == 2'd0)
         begin
-            if (internal_data[8:1] == 8'b00011101) // In phase sync sync
+            if (internal_data[8:1] == 8'b10111000) // In phase sync sync
             begin
                 state <= 2'd1;
                 counter <= 2'd3;
             end
-            else if (internal_data[7:0] == 8'b00011101) // Out of phase sync
+            else if (internal_data[7:0] == 8'b10111000) // Out of phase sync
             begin
                 state <= 2'd2;
                 counter <= 2'd3;

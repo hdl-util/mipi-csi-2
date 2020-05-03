@@ -1,5 +1,5 @@
 module camera #(
-    parameter NUM_LANES = 2
+    parameter int NUM_LANES = 2
 ) (
     input logic clock_p,
     input logic [NUM_LANES-1:0] data_p,

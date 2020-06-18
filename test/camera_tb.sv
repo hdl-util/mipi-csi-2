@@ -85,7 +85,7 @@ begin
         if (i % 4 == 2 && i > 6) // Skip header, straight to data checking
         begin
             assert (image_data_enable) else $fatal(1, "Image data not enabled on receiving the fourth byte");
-            assert (image_data == '{TEST2[i-3], TEST2[i-4], TEST2[i-5], TEST2[i-6]}) else $fatal(1, "Expected buffer to be %h but was %h", {TEST2[i-3], TEST2[i-4], TEST2[i-5], TEST2[i-6]}, {image_data[3], image_data[2], image_data[1], image_data[0]});
+            assert ({image_data[0], image_data[1], image_data[2], image_data[3]} == {TEST2[i-3], TEST2[i-4], TEST2[i-5], TEST2[i-6]}) else $fatal(1, "Expected buffer to be %h but was %h", {TEST2[i-3], TEST2[i-4], TEST2[i-5], TEST2[i-6]}, {image_data[0], image_data[1], image_data[2], image_data[3]});
         end
         else
         begin

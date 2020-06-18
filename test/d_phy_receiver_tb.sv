@@ -45,7 +45,7 @@ initial
 begin
     // Shift out sync
     wait (shift_index != 8'd0); wait (shift_index == 8'd0);
-    shift_out <= 8'b00011101;
+    shift_out <= 8'b10111000;
 
     // Shift out bytes
     for (i = 0; i < 8; i++)

@@ -53,8 +53,8 @@ initial
 begin
     // Shift out sync
     wait (shift_index != 8'd0); wait (shift_index == 8'd0);
-    shift_out[0] <= 8'b00011101;
-    shift_out[1] <= 8'b00011101;
+    shift_out[0] <= 8'b10111000;
+    shift_out[1] <= 8'b10111000;
 
     // Shift out bytes
     for (i = 0; i < 4; i+= 2)
@@ -73,8 +73,8 @@ begin
 
     // Shift out sync
     wait (shift_index != 8'd0); wait (shift_index == 8'd0);
-    shift_out[0] <= 8'b00011101;
-    shift_out[1] <= 8'b00011101;
+    shift_out[0] <= 8'b10111000;
+    shift_out[1] <= 8'b10111000;
 
     // Shift out bytes
     for (i = 0; i < 14; i+= 2)

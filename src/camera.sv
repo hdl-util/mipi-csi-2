@@ -27,9 +27,10 @@ module camera #(
     output logic [15:0] generic_short_data
 );
 
+logic [NUM_LANES-1:0] reset = NUM_LANES'(0);
+
 assign interrupt = image_data_enable || reset[0];
 
-logic [NUM_LANES-1:0] reset = NUM_LANES'(0);
 logic [7:0] data [NUM_LANES-1:0];
 logic [NUM_LANES-1:0] enable;
 

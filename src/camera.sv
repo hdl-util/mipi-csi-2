@@ -127,8 +127,6 @@ begin
     // Synchronous state reset (next clock)
     if (reset[0]) // Know the entire state is gone for sure if the first lane resets
     begin
-        packet_header <= '{8'd0, 8'd0, 8'd0, 8'd0};
-        image_data <= '{8'd0, 8'd0, 8'd0, 8'd0};
         header_index = 3'd0;
         word_counter = 17'd0;
         data_index = 2'd0;

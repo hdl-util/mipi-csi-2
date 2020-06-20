@@ -11,7 +11,7 @@ module camera #(
     output logic interrupt,
 
     // See Section 12 for how this should be parsed
-    output logic [7:0] image_data [0:3] = '{8'd0, 8'd0, 8'd0, 8'd0},
+    output logic [7:0] image_data [3:0] = '{8'd0, 8'd0, 8'd0, 8'd0},
     output logic [5:0] image_data_type,
     // Whether there is output data ready
     output logic image_data_enable,
@@ -69,18 +69,25 @@ logic [2:0] header_index = 3'd0;
 logic [16:0] word_counter = 17'd0;
 logic [1:0] data_index = 2'd0;
 
+logic already_triggered = 1'd0;
 // Count off multiples of four
 // Shouldn't be the first byte
-assign image_data_enable = data_type >= 6'h18 && data_type <= 6'h2F && word_counter != 17'd0 && (data_index == 2'd0 || word_counter == word_count);
+assign image_data_enable = data_type >= 6'h18 && data_type <= 6'h2F && word_counter != 17'd0 && (data_index == 2'd0 || word_counter == word_count) && !already_triggered;
+
+always_ff @(posedge clock_p)
+    already_triggered <= already_triggered ? (word_counter != 17'd0 && (data_index == 2'd0 || word_counter == word_count)) : image_data_enable;
 
 integer j;
-always @(posedge clock_p)
+always_ff @(posedge clock_p)
 begin
     // Lane reception
     for (j = 0; j < NUM_LANES; j++)
     begin
         if (enable[j]) // Receive byte
         begin
+            `ifdef MODEL_TECH
+                $display("Receiving on lane %d", 3'(j + 1));
+            `endif
             if (header_index < 3'd4) // Packet header
             begin
                 packet_header[header_index] <= data[j];

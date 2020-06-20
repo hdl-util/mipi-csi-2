@@ -63,6 +63,7 @@ begin
         0: begin
             if (interrupt)
             begin
+                assert (camera.header_ecc == TEST1[5]) else $fatal(1, "Header ecc incorrect");
                 assert (word_count == {TEST1[4], TEST1[3]}) else $fatal(1, "Expected word count '%h%h' but was %h", TEST1[4], TEST1[3], word_count);
                 assert (image_data_type == TEST1[2]) else $fatal(1, "Expected data type %h but was %h", TEST1[2], image_data_type);
                 $display("Test 1 complete");
@@ -81,6 +82,7 @@ begin
         1: begin
             if (interrupt)
             begin
+                assert (camera.header_ecc == TEST2[5]) else $fatal(1, "Header ecc incorrect");
                 assert (word_count == {TEST2[4], TEST2[3]}) else $fatal(1, "Expected word count '%h%h' but was %h", TEST2[4], TEST2[3], word_count);
                 assert (image_data_type == TEST2[2]) else $fatal(1, "Expected data type %h but was %h", TEST2[2], image_data_type);
                 if (image_data_enable)

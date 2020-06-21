@@ -72,13 +72,11 @@ begin
                 test_index <= 1'd0;
             end
 
-            if (test_index < 8'd6 && shift_index == 3'd7)
+            if (shift_index == 3'd7)
             begin
                 shift_out <= '{TEST1[test_index + 1'd1], TEST1[test_index]};
                 test_index <= test_index + 2'd2;
             end
-            else if (shift_index == 3'd7) // Allows time for d_phy receiver to see LP00
-                shift_out <= '{8'd0, 8'd0};
         end
         1: begin
             if (interrupt)

@@ -22,17 +22,17 @@ logic dataout_l = 1'd0;
 always_ff @(posedge clock_p) dataout_h <= data_p;
 always_ff @(negedge clock_p) dataout_l <= data_p;
 
-logic [11:0] internal_data = 12'd0;
+logic [8:0] internal_data = 9'd0;
 
 always_ff @(posedge clock_p)
-    internal_data <= {dataout_l, dataout_h, internal_data[11:2]}; // "Each byte shall be transmitted least significant bit first."
+    internal_data <= {dataout_l, dataout_h, internal_data[8:2]}; // "Each byte shall be transmitted least significant bit first."
 
 // 0 = LP RX or some other non-receiving unknown
 // 1 = In phase sync
 // 2 = Out of phase sync
 logic [1:0] state = 2'd0;
 
-assign data = state == 2'd2 ? internal_data[10:3] : internal_data[11:4];
+assign data = state == 2'd2 ? internal_data[7:0] : internal_data[8:1];
 
 // Byte counter
 logic [1:0] counter = 2'd0;
@@ -50,12 +50,12 @@ begin
     begin
         if (state == 2'd0)
         begin
-            if (internal_data == 12'b101110000000) // In phase sync sync
+            if (internal_data[8:1] == 8'b10111000) // In phase sync sync
             begin
                 state <= 2'd1;
                 counter <= 2'd3;
             end
-            else if (internal_data[10:0] == 11'b10111000000) // Out of phase sync
+            else if (internal_data[7:0] == 8'b10111000) // Out of phase sync
             begin
                 state <= 2'd2;
                 counter <= 2'd3;

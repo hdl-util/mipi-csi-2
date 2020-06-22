@@ -6,8 +6,8 @@ logic clock_n = 0;
 always
 begin
     #2ns;
-    clock_p <= ~clock_p;
-    clock_n <= clock_p;
+    clock_n <= ~clock_n;
+    clock_p <= clock_n;
 end
 
 logic data_p = 0;
@@ -38,38 +38,44 @@ begin
     shift_index <= shift_index + 1'd1;
 end
 
-logic [7:0] TEST1 [7:0] = '{8'hFE, 8'hED, 8'hFA, 8'hCE, 8'hCA, 8'hFE, 8'hBE, 8'hEF};
-integer i;
+localparam TEST1_LEN = 128;
+logic [7:0] TEST1 [0:TEST1_LEN-1] = '{8'hFE, 8'hED, 8'hFA, 8'hCE, 8'hCA, 8'hFE, 8'hBE, 8'hEF, 8'hFE, 8'hED, 8'hFA, 8'hCE, 8'hCA, 8'hFE, 8'hBE, 8'hEF, 8'hFE, 8'hED, 8'hFA, 8'hCE, 8'hCA, 8'hFE, 8'hBE, 8'hEF, 8'hFE, 8'hED, 8'hFA, 8'hCE, 8'hCA, 8'hFE, 8'hBE, 8'hEF, 8'hFE, 8'hED, 8'hFA, 8'hCE, 8'hCA, 8'hFE, 8'hBE, 8'hEF, 8'hFE, 8'hED, 8'hFA, 8'hCE, 8'hCA, 8'hFE, 8'hBE, 8'hEF, 8'hFE, 8'hED, 8'hFA, 8'hCE, 8'hCA, 8'hFE, 8'hBE, 8'hEF, 8'hFE, 8'hED, 8'hFA, 8'hCE, 8'hCA, 8'hFE, 8'hBE, 8'hEF, 8'hFE, 8'hED, 8'hFA, 8'hCE, 8'hCA, 8'hFE, 8'hBE, 8'hEF, 8'hFE, 8'hED, 8'hFA, 8'hCE, 8'hCA, 8'hFE, 8'hBE, 8'hEF, 8'hFE, 8'hED, 8'hFA, 8'hCE, 8'hCA, 8'hFE, 8'hBE, 8'hEF, 8'hFE, 8'hED, 8'hFA, 8'hCE, 8'hCA, 8'hFE, 8'hBE, 8'hEF, 8'hFE, 8'hED, 8'hFA, 8'hCE, 8'hCA, 8'hFE, 8'hBE, 8'hEF, 8'hFE, 8'hED, 8'hFA, 8'hCE, 8'hCA, 8'hFE, 8'hBE, 8'hEF, 8'hFE, 8'hED, 8'hFA, 8'hCE, 8'hCA, 8'hFE, 8'hBE, 8'hEF, 8'hFE, 8'hED, 8'hFA, 8'hCE, 8'hCA, 8'hFE, 8'hBE, 8'hEF};
 
-initial
+integer i = -2;
+always @(posedge clock_p)
 begin
-    // Shift out sync
-    wait (shift_index != 8'd0); wait (shift_index == 8'd0);
-    shift_out <= 8'b10111000;
-
-    // Shift out bytes
-    for (i = 0; i < 8; i++)
+    if (shift_index == 3'd7 && i < TEST1_LEN)
     begin
-        wait (shift_index != 8'd0); wait (shift_index == 8'd0);
-        shift_out <= TEST1[i];
-        if (i != 0)
-        begin
-            wait (enable);
-            assert (data === TEST1[i - 1]) else $fatal(1, "Received data incorrect for %d: expected %h, got %h", 4'(i), TEST1[i-1], data);
-        end
+        if (i == -2)
+            shift_out <= 8'd0;
+        else if (i == -1)
+            shift_out <= 8'b10111000;
+        else
+            shift_out <= TEST1[i];
+        i <= i + 1;
     end
-
-    wait (shift_index != 8'd0); wait (shift_index == 8'd0);
-    wait (enable);
-    assert (data == TEST1[7]) else $fatal(1, "Received data incorrect for %d: expected %h, got %h", 4'(7), TEST1[7], data);
+    if (enable && i > 0 && i <= TEST1_LEN + 1)
+    begin
+        assert(data == TEST1[i - 2]) else $fatal(1, "data not expected: %h vs %h", data, TEST1[i - 2]);
+        if (i >= TEST1_LEN)
+            i <= i + 1;
+    end
+    else if (i > TEST1_LEN + 1)
+    begin
+        assert(!enable) else $fatal(1, "unexpected enables after TX finished");
+        if (i == TEST1_LEN + 2)
+            reset <= 1'd1;
+        else if (i == TEST1_LEN + 3)
+            reset <= 1'd0;
+        else
+        begin
+            assert(d_phy_receiver.state == 2'd0) else $fatal(1, "receiver is in %d but should've returned to UNKNOWN", d_phy_receiver.state);
+            $finish;
+        end
+        i <= i + 1;
+    end
     
 
-    wait (!clock_p);
-    reset <= 1'd1; // Reset should be applied without any spurious enables, even if it is delayed by a few clocks
-    wait (clock_p);
-    wait (!clock_p);
-    assert (d_phy_receiver.state == 1'b0);
-    $finish;
 end
 
 endmodule

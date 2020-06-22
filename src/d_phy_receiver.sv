@@ -4,7 +4,11 @@
 // LVDS is picked, and though this doesn't technically comply with D-PHY, it should work.
 // This means the protocol layer should send a reset after receiving the last byte.
 // https://www.intel.com/content/www/us/en/programmable/documentation/mcn1446711751001.html#mcn1448380606073
-module d_phy_receiver (
+module d_phy_receiver #(
+    // Gives the receiver resistance to noise by expecting 0s before a sync sequence
+    // May require some tuning, but I tested it with 4 for around 8 hours and saw no errors.
+    parameter int ZERO_ACCUMULATOR_WIDTH = 4
+) (
     input logic clock_p,
     input logic data_p,
     // Synchronous reset
@@ -38,7 +42,6 @@ logic [1:0] counter = 2'd0;
 
 assign enable = state != STATE_UNKNOWN && counter == 2'd0;
 
-localparam ZERO_ACCUMULATOR_WIDTH = 3;
 logic [ZERO_ACCUMULATOR_WIDTH-1:0] zero_accumulator = ZERO_ACCUMULATOR_WIDTH'(0);
 always_ff @(posedge clock_p)
 begin

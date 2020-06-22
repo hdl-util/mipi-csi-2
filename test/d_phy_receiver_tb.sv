@@ -18,7 +18,7 @@ logic reset = 0;
 logic [7:0] data;
 logic enable;
 
-d_phy_receiver d_phy_receiver (
+d_phy_receiver #(.ZERO_ACCUMULATOR_WIDTH(2)) d_phy_receiver (
     .clock_p(clock_p),
     .data_p(data_p),
     // Synchronous reset

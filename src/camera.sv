@@ -1,5 +1,8 @@
 module camera #(
-    parameter int NUM_LANES = 2
+    parameter int NUM_LANES = 2,
+    // Gives the underlying d_phy_receivers resistance to noise by expecting 0s before a sync sequence
+    // May require some tuning, but I tested it with 4 for around 8 hours and saw no errors.
+    parameter int ZERO_ACCUMULATOR_WIDTH = 4
 ) (
     input logic clock_p,
     input logic [NUM_LANES-1:0] data_p,
@@ -37,7 +40,7 @@ genvar i;
 generate
     for (i = 0; i < NUM_LANES; i++)
     begin: lane_receivers
-        d_phy_receiver d_phy_receiver (
+        d_phy_receiver #(.ZERO_ACCUMULATOR_WIDTH(ZERO_ACCUMULATOR_WIDTH)) d_phy_receiver (
             .clock_p(clock_p),
             .data_p(data_p[i]),
             .reset(reset[i]),

@@ -20,7 +20,7 @@ logic [7:0] image_data [3:0];
 logic [5:0] image_data_type;
 logic image_data_enable, interrupt;
 
-camera #(.NUM_LANES(2)) camera (
+camera #(.NUM_LANES(2), .ZERO_ACCUMULATOR_WIDTH(2)) camera (
     .clock_p(clock_p),
     .data_p(data_p),
     // Corresponding virtual channel for the image data

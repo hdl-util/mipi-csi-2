@@ -1,8 +1,7 @@
 module camera #(
     parameter int NUM_LANES = 2,
     // Gives the underlying d_phy_receivers resistance to noise by expecting 0s before a sync sequence
-    // May require some tuning, but I tested it with 4 for around 8 hours and saw no errors.
-    parameter int ZERO_ACCUMULATOR_WIDTH = 4
+    parameter int ZERO_ACCUMULATOR_WIDTH = 3
 ) (
     input logic clock_p,
     input logic [NUM_LANES-1:0] data_p,

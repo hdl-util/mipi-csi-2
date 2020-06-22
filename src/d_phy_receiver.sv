@@ -6,8 +6,7 @@
 // https://www.intel.com/content/www/us/en/programmable/documentation/mcn1446711751001.html#mcn1448380606073
 module d_phy_receiver #(
     // Gives the receiver resistance to noise by expecting 0s before a sync sequence
-    // May require some tuning, but I tested it with 4 for around 8 hours and saw no errors.
-    parameter int ZERO_ACCUMULATOR_WIDTH = 4
+    parameter int ZERO_ACCUMULATOR_WIDTH = 3
 ) (
     input logic clock_p,
     input logic data_p,

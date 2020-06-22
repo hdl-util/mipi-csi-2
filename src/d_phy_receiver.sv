@@ -38,7 +38,7 @@ logic [1:0] counter = 2'd0;
 
 assign enable = state != STATE_UNKNOWN && counter == 2'd0;
 
-localparam ZERO_ACCUMULATOR_WIDTH = 2;
+localparam ZERO_ACCUMULATOR_WIDTH = 3;
 logic [ZERO_ACCUMULATOR_WIDTH-1:0] zero_accumulator = ZERO_ACCUMULATOR_WIDTH'(0);
 always_ff @(posedge clock_p)
 begin

@@ -29,7 +29,6 @@ module camera #(
 
 logic [NUM_LANES-1:0] reset = NUM_LANES'(0);
 
-assign interrupt = image_data_enable || reset[0];
 
 logic [7:0] data [NUM_LANES-1:0];
 logic [NUM_LANES-1:0] enable;
@@ -72,10 +71,11 @@ logic [1:0] data_index = 2'd0;
 logic already_triggered = 1'd0;
 // Count off multiples of four
 // Shouldn't be the first byte
-assign image_data_enable = data_type >= 6'h18 && data_type <= 6'h2F && word_counter != 17'd0 && (data_index == 2'd0 || word_counter == word_count) && !already_triggered;
-
+assign image_data_enable = data_type >= 6'h18 && data_type <= 6'h2F && data_index == 2'd0 && word_counter != 17'd0 && word_counter <= word_count && !already_triggered;
 always_ff @(posedge clock_p)
-    already_triggered <= already_triggered ? (word_counter != 17'd0 && (data_index == 2'd0 || word_counter == word_count)) : image_data_enable;
+    already_triggered = already_triggered ? enable == NUM_LANES'(0) : image_data_enable;
+
+assign interrupt = image_data_enable || (reset[0] && data_type <= 6'hF);
 
 integer j;
 always_ff @(posedge clock_p)
@@ -132,6 +132,7 @@ begin
         end
     end
     // Synchronous state reset (next clock)
+    // The remaining lanes are in a sticky reset state where they remain reset until the first lane also resets
     if (reset[0]) // Know the entire state is gone for sure if the first lane resets
     begin
         header_index = 3'd0;

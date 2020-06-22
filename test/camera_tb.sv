@@ -70,6 +70,7 @@ begin
                 $display("Test 1 complete");
                 current_test <= 1;
                 test_index <= 1'd0;
+                shift_out <= '{8'd0, 8'd0}; // Required to satisfy zero counter expectations in dphy
             end
 
             if (shift_index == 3'd7)
@@ -88,12 +89,12 @@ begin
                 if (image_data_enable)
                 begin
                     assert (actual_image_data == expected_image_data) else $fatal(1, "Expected image data to be %h but was %h", expected_image_data, actual_image_data);
-                    image_data_index <= image_data_index + 4;
-                end
-                else
-                begin
-                    $display("Test 2 complete");
-                    $finish;
+                    image_data_index = image_data_index + 4;
+                    if (image_data_index == 8)
+                    begin
+                        $display("Test 2 complete");
+                        $finish;
+                    end
                 end
             end
 
@@ -104,6 +105,16 @@ begin
             end
         end
     endcase
+end
+
+logic last_image_data_enable = 1'b0, last_interrupt = 1'b0;
+
+always_ff @(posedge clock_p)
+begin
+    last_image_data_enable <= image_data_enable;
+    last_interrupt <= interrupt;
+    assert (!(last_image_data_enable && image_data_enable)) else $fatal(1, "double image data enable occurred");
+    assert (!(last_interrupt && interrupt)) else $fatal(1, "double interrupt occurred");
 end
 
 endmodule
